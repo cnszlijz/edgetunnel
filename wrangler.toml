@@ -3,9 +3,15 @@ name = "cf-worker-ws-dev-0415" # todo
 #main = "test/worker/cf-cdn-cgi-trace2.js"
 
 #main = "test/worker/worker-connect-test.js"
-main = "src/worker-vless.js"
+#main = "src/worker-vless.js"
+main = "src/worker-vless-splithttp.js"
 
 compatibility_date = "2024-04-15"
 
 [vars]
 # UUID = "example_dev_token"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "xray"
+database_id = "5a4d05d9-568a-478d-973e-64a1fdf55c20"
