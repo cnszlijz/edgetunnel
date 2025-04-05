@@ -33,7 +33,7 @@ export default {
 			const currentTime = Math.floor(Date.now() / 1000);
 			await db.prepare("DELETE FROM xhttp WHERE createtime < ?").bind(currentTime - 60).run();
 			const { results } = await db.prepare("SELECT * FROM xhttp").all();
-			const url = new URL(request.url);
+			let url = new URL(request.url);
 			switch(request.method){
 				case "POST":
 					if (!url.pathname.startsWith(path)){
@@ -41,7 +41,18 @@ export default {
 					}
 					let newPath = url.pathname.slice(path.length);
 					if(newPath[0]=='/')newPath = newPath.slice(1);
-					const [uuid,seq]=newPath.split('/');
+					let [uuid,seq]=newPath.split('/');
+					console.log(`POST fetch uuid ${uuid} and seq ${seq} from path.`);
+					if(uuid == "REDACTED"){
+						url = new URL(request.headers.referer);
+						if (!url.pathname.startsWith(path)){
+							return new Response('Not found', { status: 404 });
+						}
+						let newPath = url.pathname.slice(path.length);
+						if(newPath[0]=='/')newPath = newPath.slice(1);
+						uuid=newPath.split('/')[0];
+						console.log(`POST fetch uuid ${uuid} from referer.`);
+					}
 					if(!isValidUUID(uuid)){
 						throw new Error('POST uuid is not valid');
 					}
@@ -82,7 +93,18 @@ export default {
 							}
 							let newPath = url.pathname.slice(path.length);
 							if(newPath[0]=='/')newPath = newPath.slice(1);
-							const uuid=newPath.split('/')[0];
+							let uuid=newPath.split('/')[0];
+							console.log(`GET fetch uuid ${uuid} from path.`);
+							if(uuid == "REDACTED"){
+								url = new URL(request.headers.referer);
+								if (!url.pathname.startsWith(path)){
+									return new Response('Not found', { status: 404 });
+								}
+								let newPath = url.pathname.slice(path.length);
+								if(newPath[0]=='/')newPath = newPath.slice(1);
+								uuid=newPath.split('/')[0];
+								console.log(`GET fetch uuid ${uuid} from referer.`);
+							}
 							if(!isValidUUID(uuid)){
 								throw new Error('GET uuid is not valid');
 							}
